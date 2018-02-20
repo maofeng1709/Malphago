@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title> Malphago, a professional rock-paper-scissors player</title>
+<script src="static/js/jquery-3.3.1.min.js"></script>
+<script src="static/js/jquery.blockUI.js"></script>
+<style>
+
+body {
+	text-align: center;
+	line-height: 1.6;
+}
+
+img {
+	width: 125px; 
+	height: 125px;
+	cursor: pointer;
+    margin-right: 10px;
+    margin-left: 10px;
+	vertical-align: middle;
+}
+
+div {
+    margin: auto;
+    padding: 5px;
+}
+
+table {
+	margin: auto;
+}
+
+th, td {
+	padding: 10px 60px;
+	text-align: center;
+}
+
+
+</style>
+
+
+</head>
+
+
+<body>
+
+<div>
+<h2>Hi, my name is Malphago, a professional Rock–paper–scissors player</h2>
+I have played {{n_rows}} games with humain players. Here is my record: {{wins}} wins({{win_per}}), {{ties}} ties({{tie_per}}), and {{losses}} losses({{loss_per}}).<br/>
+By the way, I have a brother <a href='DeepMalphago'>Deep Malphago</a>, wish you'd like to play with him as well!
+</div>
+<hr>
+
+<div>Click on your choice, I am waiting for you...</div>
+<div>
+	<img id='rock' src='static/images/rock.png' onclick="get_result(0)"></img>
+	<img id='paper' src='static/images/paper.png' onclick="get_result(1)"></img>
+	<img id='scissors' src='static/images/scissors.png' onclick="get_result(2)"></img>
+</div>
+
+<hr>
+
+<div id='result' style='display:none' >
+	you
+	<img id='user' style='cursor:auto'>
+	V.S.
+	<img id='malphago' style='cursor:auto'>
+	Malphago<br>
+	<p id='output'></p>
+</div>
+<div id='stat' style='display:none'>
+<hr>
+<table style='align:center'>
+  <tr>
+    <th>Wins</th>
+    <th>Ties</th>
+    <th>Losses</th>
+  </tr>
+  <tr>
+    <td id='wins'>0</td>
+    <td id='ties'>0</td>
+    <td id='losses'>0</td>
+  </tr>
+<table>
+</div>
+
+</body>
+
+<script src='static/js/Malphago.js'> </script>
+</html>
+
