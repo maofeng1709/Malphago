@@ -7,19 +7,28 @@
 '''''''''''''''''
 
 
-from flask_mysqldb import MySQL
+from flask_sqlalchemy import SQLAlchemy
+db = SQLAlchemy()
 
-mysql = MySQL()
+#class Replay(db.Model):
+#    session_id = db.Column(db.String(50))
+#    user_choice = db.Column(db.Integer)
+#    my_choice = db.Column(db.Integer)
+#    reg_date = db.Column(db.DateTime)
+#    curr_state = db.Column(db.Integer)
+#    replay_id = db.Column(db.Integer, primary_key=True)
+#    def __repr__(self):
+#        return '<Replay %d>' % self.replay_id
+
 
 def write_db(session_id, user_choice, my_choice, curr_state):
-    cur = mysql.connection.cursor()
-    cur.execute('''INSERT INTO replay (session_id, user_choice, my_choice, curr_state) VALUES (%s, %s, %s, %s)''', (session_id, user_choice, my_choice, curr_state))
-    res = mysql.connection.commit()
-    cur.close()
+    conn = db.engine.connect()
+    conn.execute('''INSERT INTO replay (session_id, user_choice, my_choice, curr_state) VALUES (%s, %s, %s, %s)''', (session_id, user_choice, my_choice, curr_state))
+    conn.close()
     return 
 
 def get_history():
-    n_rows = get_n_rows()[0]
+    n_rows = get_n_rows()
     stats = get_stats()
     wins, ties, losses= 0, 0, 0
     for diff, cnt in stats:
@@ -32,25 +41,22 @@ def get_history():
     return n_rows, wins, ties, losses
 
 def get_n_rows():
-    cur = mysql.connection.cursor()
-    cur.execute('''select count(*) from replay''')
-    res = cur.fetchone()
-    cur.close()
-    return res
+    conn = db.engine.connect()
+    res = conn.execute('''select count(*) from replay''')
+    conn.close()
+    return res.fetchone()[0]
 
 def get_stats():
-    cur = mysql.connection.cursor()
-    cur.execute('''select (user_choice - my_choice) % 3, count(*) from replay group by (user_choice - my_choice) % 3''')
-    res = cur.fetchall()
-    cur.close()
-    return res
+    conn = db.engine.connect()
+    res = conn.execute('''select (user_choice - my_choice) %% 3, count(*) from replay group by (user_choice - my_choice) %% 3''')
+    conn.close()
+    return res.fetchall()
 
 
 def get_init_Q():
-    cur = mysql.connection.cursor()
-    cur.execute('''select curr_state, user_choice , count(*) from replay group by curr_state, user_choice''')
-    res = cur.fetchall()
-    cur.close()
+    conn = db.engine.connect()
+    res = conn.execute('''select curr_state, user_choice , count(*) from replay group by curr_state, user_choice''').fetchall()
+    conn.close()
     
     init_Q = {i: [0,0,0] for i in range(10)}
     

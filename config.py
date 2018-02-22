@@ -4,7 +4,8 @@
  * Last modified : 2018-02-19 16:33
  * Filename : config.py
  * Description : 
-'''''''''''''''''
+     '''''''''''''''''
+import os
 
 # general settings
 DEBUG = True;
@@ -15,8 +16,7 @@ SESSION_TYPE = 'filesystem'
 SESSION_PERMANENT = False
 
 # database
-MYSQL_HOST = '127.0.0.1'
-MYSQL_USER = 'root'
-MYSQL_PASSWORD = ''
-MYSQL_PORT = 3306
-MYSQL_DB = 'Malphago'
+SQLALCHEMY_DATABASE_URI = os.environ['SQLALCHEMY_DATABASE_URI']
+SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+

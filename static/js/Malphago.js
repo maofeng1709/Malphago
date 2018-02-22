@@ -54,7 +54,7 @@ function update_state(choice) {
 	ready = false;
 	$.ajax({
 		type: 'POST',
-		url: 'http://localhost:5000/update_state',
+		url: '/update_state',
 		data: {'choice': choice},
 		success: function(data){
 			my_choice = data;	
@@ -70,7 +70,7 @@ function update_state(choice) {
 function preload() {
 	$.ajax({
 		type: 'POST',
-		url: 'http://localhost:5000/preload',
+		url: '/preload',
 		dataType: 'json',
 		success: function(data){
 			var state = data['state'];

@@ -7,19 +7,23 @@
      '''''''''''''''''
 
 from flask import Flask, request, session, render_template, jsonify
-from flask.ext.session import Session
+from flask_session import Session
+
 
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
 Session(app)
 
 import numpy as np
-from models.model import mysql, write_db, get_history, get_init_Q
+from models.model import db, write_db, get_history, get_init_Q
+
+db.init_app(app)
+
 
 
 init_state = 9 # init state is the last state
-alpha = 0.5
-gamma = 0.5
+alpha = 0.6
+gamma = 0.4
 epsilon = 0.2
 
 def init_context():
@@ -31,7 +35,7 @@ def init_context():
     return
 
 def get_context():
-    return session['Q_function'], session['my_choice'], session['curr_state'], session['stats']
+    return session['Q_function'], int(session['my_choice']), int(session['curr_state'])
 
 def get_reward(choice):
     my_choice = session['my_choice']
@@ -60,7 +64,7 @@ def preload():
 def update_state():
     if 'curr_state' not in session:
         init_context()
-    Q, my_choice, curr_state, _ = get_context()
+    Q, my_choice, curr_state = get_context()
     # update the Q function
     choice = int(request.form['choice'])
     write_db(request.cookies['session'], choice, my_choice, curr_state)
@@ -80,6 +84,7 @@ def update_state():
 @app.route('/Malphago')
 def Malphago():
     n_rows, wins, ties, losses = get_history()
+    n_rows = max(1, n_rows)
     params = {
             'n_rows': n_rows,
             'wins': wins,
@@ -97,8 +102,6 @@ def DeepMalphago():
 
 @app.route('/')
 def index():
-    return str(get_init_Q())
-
+    return Malphago()
 if __name__ == '__main__':
-    mysql.init_app(app)
     app.run()
