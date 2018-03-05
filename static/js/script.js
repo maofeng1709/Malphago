@@ -33,15 +33,15 @@ function get_result(choice){
 	my_img.src = 'static/images/' + choices[my_choice];
 
 	if (choice == my_choice) {
-		output.innerHTML = 'We tied';
+		output.innerHTML = 'We tied!';
 		ties++;
 		document.getElementById('ties').innerHTML = ties;
-	} else if ((choice - my_choice) % 3 == 1){
-		output.innerHTML = 'You won';
+	} else if (choice - my_choice == 1 || choice - my_choice == -2){
+		output.innerHTML = 'You won!';
 		wins++;
 		document.getElementById('wins').innerHTML = wins;
 	} else {
-		output.innerHTML = 'You lost';
+		output.innerHTML = 'You lost!';
 		losses++;
 		document.getElementById('losses').innerHTML = losses;
 	}
@@ -67,7 +67,23 @@ function update_state(choice) {
 	});
 }
 
+function restart() {
+	$.ajax({
+		type: 'POST',
+		url: '/restart',
+		success: function(data){
+			location.reload()
+
+		},
+		error: function(xhr, error){
+			console.log(xhr);
+			console.log(error);
+		}
+	});
+}
+
 function preload() {
+	ready = false;
 	$.ajax({
 		type: 'POST',
 		url: '/preload',
@@ -100,14 +116,15 @@ function preload() {
 				document.getElementById('wins').innerHTML = wins;
 				document.getElementById('losses').innerHTML = losses;
 				if (last_choice == my_last_choice) {
-					output.innerHTML = 'We tied';
+					output.innerHTML = 'We tied!';
 				} else if (last_choice - my_last_choice == 1 || last_choice - my_last_choice == -2){
-					output.innerHTML = 'You won';
+					output.innerHTML = 'You won!';
 				} else {
-					output.innerHTML = 'You lost';
+					output.innerHTML = 'You lost!';
 				}
 
 			}
+			ready = true;
 		},
 		error: function(xhr, error){
 			console.log(xhr);

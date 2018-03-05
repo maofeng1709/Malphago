@@ -60,6 +60,11 @@ def preload():
     my_choice = session['my_choice']
     return jsonify({'wins': wins, 'ties': ties, 'losses': losses, 'state': curr_state, 'my_choice': my_choice})
 
+@app.route('/restart', methods=['POST'])
+def restart():
+    init_context()
+    return 'restarted'
+
 @app.route('/update_state', methods=['GET', 'POST'])
 def update_state():
     if 'curr_state' not in session:
