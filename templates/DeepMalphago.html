@@ -2,18 +2,20 @@
 <html>
 
 <head>
-<title> Malphago, a professional rock-paper-scissors player</title>
+<title> Deep Malphago, a dominator of rock-paper-scissors</title>
 <script src="static/js/jquery-3.3.1.min.js"></script>
 <script src="static/js/jquery.blockUI.js"></script>
+<script> var deep = 1; </script>
 <style>
 
 body {
 	text-align: center;
+	line-height: 1.6;
 }
 
 img {
-	width: 150px; 
-	height: 150px;
+	width: 125px; 
+	height: 125px;
 	cursor: pointer;
     margin-right: 10px;
     margin-left: 10px;
@@ -44,11 +46,13 @@ th, td {
 <body>
 
 <div>
-<h2>Hi, my name is Deep Malphago, I am not born yet...</h2>
+<h2>Hi, my name is Deep Malphago, a trouble maker of Rock–paper–scissors</h2>
+I have played {{n_rows}} games with humain players. Here is my record: {{wins}} wins({{win_per}}), {{ties}} ties({{tie_per}}), and {{losses}} losses({{loss_per}}).<br/>
+By the way, I have a brother <a href='Malphago'>Malphago</a>, wish you'd like to play with him as well!
 </div>
 <hr>
-<!--
-<div>Click on your choice, I am waiting for you...</div>
+
+<div>Click on your choice, I'll get stronger while playing with you!</div>
 <div>
 	<img id='rock' src='static/images/rock.png' onclick="get_result(0)"></img>
 	<img id='paper' src='static/images/paper.png' onclick="get_result(1)"></img>
@@ -64,6 +68,7 @@ th, td {
 	<img id='malphago' style='cursor:auto'>
 	Malphago<br>
 	<p id='output'></p>
+	<span style='cursor:pointer;text-decoration:underline' onclick='restart()'>Click here to restart an episode, I'll forget your behavior...</span>
 </div>
 <div id='stat' style='display:none'>
 <hr>
@@ -80,9 +85,9 @@ th, td {
   </tr>
 <table>
 </div>
--->
+
 </body>
 
-<script src='static/js/Malphago.js'> </script>
+<script src='static/js/script.js'> </script>
 </html>
 

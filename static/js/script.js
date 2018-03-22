@@ -50,11 +50,13 @@ function get_result(choice){
 	update_state(choice);
 }
 
+
 function update_state(choice) {
 	ready = false;
+	target = deep ? '/update_deep_state' : '/update_state'
 	$.ajax({
 		type: 'POST',
-		url: '/update_state',
+		url: target,
 		data: {'choice': choice},
 		success: function(data){
 			my_choice = data;	
@@ -71,6 +73,7 @@ function restart() {
 	$.ajax({
 		type: 'POST',
 		url: '/restart',
+		data: {'deep': deep},
 		success: function(data){
 			location.reload()
 
@@ -88,6 +91,7 @@ function preload() {
 		type: 'POST',
 		url: '/preload',
 		dataType: 'json',
+		data: {'deep': deep},
 		success: function(data){
 			var state = data['state'];
 			wins = data['wins'];
@@ -96,7 +100,6 @@ function preload() {
 			my_choice = data['my_choice'];
 
 			if (state != 9) {
-
 				last_choice = state % 3;
 				my_last_choice = Math.floor(state / 3);
 
