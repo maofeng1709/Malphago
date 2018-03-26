@@ -14,6 +14,9 @@ from tools.global_vars import comm_vars, deep_vars
 
 input_dim, hidden_dim, output_dim, learning_rate = deep_vars.input_dim, deep_vars.hidden_dim, deep_vars.output_dim, deep_vars.learning_rate
 
+sess = tf.Session()
+X = tf.placeholder(tf.float32, shape=[None, input_dim])
+
 def get_tf_variables(params, sess): #get W1 b1 W2 b2 for each Q
     variables = []
 

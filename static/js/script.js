@@ -70,11 +70,13 @@ function update_state(choice) {
 }
 
 function restart() {
+	$.blockUI();
 	$.ajax({
 		type: 'POST',
 		url: '/restart',
 		data: {'deep': deep},
 		success: function(data){
+			$.unblockUI();
 			location.reload()
 
 		},

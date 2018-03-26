@@ -17,7 +17,7 @@ class deep_vars:
     hidden_dim = 5
     output_dim = 1
     learning_rate = 0.01
-    batch_size = 5
+    batch_size = 1
 
 
     

@@ -8,6 +8,7 @@
 
 from flask import Flask, request, session, render_template, jsonify
 from flask_session import Session
+from time import time
 
 
 app = Flask(__name__)
@@ -33,17 +34,19 @@ def init_context():
     return
 
 def init_deep_context():
-    with tf.Session() as sess:
-        X = tf.placeholder(tf.float32, shape=(None,deep_vars.input_dim))
-        tf_variables = get_tf_variables([],sess)
-        deep_Qs = get_init_deep_Q(get_init_Q(), X, tf_variables, sess)
-        session['deep_params'] = [{}, {}, {}]
-        update_params_from_variables(session['deep_params'], tf_variables, sess)
-        session['curr_deep_state'] = comm_vars.init_state
-        session['my_deep_choice'] = np.argmax(sess.run(deep_Qs, {X: state_to_input(comm_vars.init_state)}))
-        session['deep_stats'] = [0,0,0]
-        session['replay_memory'] = []
-
+    graph = tf.Graph()
+    with graph.as_default():
+        with tf.Session() as sess:
+            X = tf.placeholder(tf.float32, shape=(None,deep_vars.input_dim))
+            tf_variables = get_tf_variables([],sess)
+            deep_Qs = get_init_deep_Q(get_init_Q(), X, tf_variables, sess)
+            session['deep_params'] = [{}, {}, {}]
+            update_params_from_variables(session['deep_params'], tf_variables, sess)
+            session['curr_deep_state'] = comm_vars.init_state
+            session['my_deep_choice'] = np.argmax(sess.run(deep_Qs, {X: state_to_input(comm_vars.init_state)}))
+            session['deep_stats'] = [0,0,0]
+            session['replay_memory'] = []
+    tf.reset_default_graph()
     return
 
 def get_context():
@@ -109,39 +112,46 @@ def update_state():
 
 @app.route('/update_deep_state', methods=['GET', 'POST'])
 def update_deep_state():
-    with tf.Session() as sess:
-        # prepare tf model for current user
-        X = tf.placeholder(tf.float32, shape=(None,deep_vars.input_dim))
-        tf_variables = get_tf_variables(session['deep_params'],sess)
-        deep_Qs = [deep_Q(X, tf_variables[0]), deep_Q(X,tf_variables[1]), deep_Q(X, tf_variables[2])]
-        # observe the user choice and get reward
-        choice = int(request.form['choice'])
-        my_choice, curr_state = get_deep_context()
-        write_db(request.cookies['session'], choice, my_choice, curr_state, deep=True)
-        r = get_reward(choice, deep=True)
-        next_state = choice + my_choice*3
-        session['replay_memory'].append([curr_state, my_choice, r, next_state])
+    tag = time() 
+    graph = tf.Graph()
+    with graph.as_default():
+         with tf.Session() as sess:
+            # prepare tf model for current user
+            X = tf.placeholder(tf.float32, shape=(None,deep_vars.input_dim))
+            tf_variables = get_tf_variables(session['deep_params'],sess)
+            deep_Qs = [deep_Q(X, tf_variables[0]), deep_Q(X,tf_variables[1]), deep_Q(X, tf_variables[2])]
+            print time() - tag
+            # observe the user choice and get reward
+            choice = int(request.form['choice'])
+            my_choice, curr_state = get_deep_context()
+            write_db(request.cookies['session'], choice, my_choice, curr_state, deep=True)
+            r = get_reward(choice, deep=True)
+            next_state = choice + my_choice*3
+            session['replay_memory'].append([curr_state, my_choice, r, next_state])
 
-        Q_vals = sess.run(deep_Qs, {X: state_to_input(next_state)})
+            Q_vals = sess.run(deep_Qs, {X: state_to_input(next_state)})
 
-        # update the Q function parameters
-        # prepare the train data, we take into consider only the last batch_size replays
-        # because we suppose that user's next choice depends on his preivous plays  
-        batch_size = min(deep_vars.batch_size, len(session['replay_memory']))
-        replays = [session['replay_memory'][-1-i] for i in range(batch_size)]
-        for replay in replays:
-            data_X = state_to_input(replay[0])
-            # target value of y = r(curr_state) + gamma*max(Q(next_state)_rock/paper/scissors)
-            data_y = replay[2] + comm_vars.gamma * max(sess.run(deep_Qs, {X: state_to_input(replay[3])}))
-            train_deep_Q(deep_Qs[replay[1]], X, data_X, data_y, 10, sess)
-        update_params_from_variables(session['deep_params'], tf_variables, sess)
-        # return new choice, eplison greedy
-        if np.random.rand() < comm_vars.epsilon:
-            session['my_deep_choice'] = np.random.randint(3)
-        else:
-            session['my_deep_choice'] = np.argmax(Q_vals)
-        session['curr_deep_state'] = next_state
-        print Q_vals, choice, my_choice, curr_state
+            # update the Q function parameters
+            # prepare the train data, we take into consider only the last batch_size replays
+            # because we suppose that user's next choice depends on his preivous plays  
+            batch_size = min(deep_vars.batch_size, len(session['replay_memory']))
+            print batch_size
+            for i in range(batch_size):
+                replay = session['replay_memory'][-1-i]
+                data_X = state_to_input(replay[0])
+                # target value of y = r(curr_state) + gamma*max(Q(next_state)_rock/paper/scissors)
+                data_y = replay[2] + comm_vars.gamma * max(sess.run(deep_Qs, {X: state_to_input(replay[3])}))
+                train_deep_Q(deep_Qs[replay[1]], X, data_X, data_y, 20, sess)
+            print time() - tag
+            update_params_from_variables(session['deep_params'], tf_variables, sess)
+            # return new choice, eplison greedy
+            if np.random.rand() < comm_vars.epsilon:
+                session['my_deep_choice'] = np.random.randint(3)
+            else:
+                session['my_deep_choice'] = np.argmax(Q_vals)
+            session['curr_deep_state'] = next_state
+            print Q_vals, choice, my_choice, curr_state
+    tf.reset_default_graph()
     return str(session['my_deep_choice'])
 
 
