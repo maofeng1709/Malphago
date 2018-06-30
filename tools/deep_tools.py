@@ -14,9 +14,6 @@ from tools.global_vars import comm_vars, deep_vars
 
 input_dim, hidden_dim, output_dim, learning_rate = deep_vars.input_dim, deep_vars.hidden_dim, deep_vars.output_dim, deep_vars.learning_rate
 
-sess = tf.Session()
-X = tf.placeholder(tf.float32, shape=[None, input_dim])
-
 def get_tf_variables(params, sess): #get W1 b1 W2 b2 for each Q
     variables = []
 
@@ -55,8 +52,8 @@ def update_params_from_variables(params, tf_variables, sess):
                    
 def deep_Q(X, tf_variable):
     W1, b1, W2, b2 = tf_variable
-    hidden = tf.tanh(tf.matmul(X, W1) + b1)
-    y_pred = tf.sigmoid(tf.matmul(hidden, W2) + b2)
+    hidden = tf.sigmoid(tf.matmul(X, W1) + b1)
+    y_pred = 2 * tf.tanh(tf.matmul(hidden, W2) + b2)
     return y_pred
 
 def get_init_deep_Q(init_Q, X, tf_variables, sess):

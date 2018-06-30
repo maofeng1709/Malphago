@@ -112,7 +112,6 @@ def update_state():
 
 @app.route('/update_deep_state', methods=['GET', 'POST'])
 def update_deep_state():
-    tag = time() 
     graph = tf.Graph()
     with graph.as_default():
          with tf.Session() as sess:
@@ -120,7 +119,6 @@ def update_deep_state():
             X = tf.placeholder(tf.float32, shape=(None,deep_vars.input_dim))
             tf_variables = get_tf_variables(session['deep_params'],sess)
             deep_Qs = [deep_Q(X, tf_variables[0]), deep_Q(X,tf_variables[1]), deep_Q(X, tf_variables[2])]
-            print time() - tag
             # observe the user choice and get reward
             choice = int(request.form['choice'])
             my_choice, curr_state = get_deep_context()
@@ -135,14 +133,12 @@ def update_deep_state():
             # prepare the train data, we take into consider only the last batch_size replays
             # because we suppose that user's next choice depends on his preivous plays  
             batch_size = min(deep_vars.batch_size, len(session['replay_memory']))
-            print batch_size
             for i in range(batch_size):
                 replay = session['replay_memory'][-1-i]
                 data_X = state_to_input(replay[0])
                 # target value of y = r(curr_state) + gamma*max(Q(next_state)_rock/paper/scissors)
                 data_y = replay[2] + comm_vars.gamma * max(sess.run(deep_Qs, {X: state_to_input(replay[3])}))
                 train_deep_Q(deep_Qs[replay[1]], X, data_X, data_y, 20, sess)
-            print time() - tag
             update_params_from_variables(session['deep_params'], tf_variables, sess)
             # return new choice, eplison greedy
             if np.random.rand() < comm_vars.epsilon:
